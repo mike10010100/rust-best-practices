@@ -400,6 +400,18 @@ async fn test_concurrent_job_registration() {
 #[tokio::test]
 async fn test_scheduler_builder_and_try_new() {
     use rust_best_practices::scheduler::SchedulerBuilder;
+    use rust_best_practices::store::InMemoryJobStore;
+
+    // Test default builder, with_store, and with_rate_limiter
+    let limiter = RateLimiter::try_new(5, 10.0).unwrap();
+    let store = InMemoryJobStore::new();
+    let (_s, _r) = SchedulerBuilder::default()
+        .with_store(store)
+        .with_rate_limiter(limiter)
+        .build();
+
+    // Test builder rate_limiter error branch
+    assert!(SchedulerBuilder::new().rate_limiter(0, 10.0).is_err());
 
     // Test successful builder with rate_limiter
     let (scheduler, runner) = SchedulerBuilder::new()
